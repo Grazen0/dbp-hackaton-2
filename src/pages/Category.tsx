@@ -1,10 +1,11 @@
-import { useSuspenseQuery } from '@tanstack/react-query';
+import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
 import { LuTrash } from 'react-icons/lu';
 import { useParams } from 'react-router';
 import { apiQuery } from '../lib/api/util/api-query';
 import { getAxiosInstance } from '../lib/api/util/axios-instance';
 import { CategorySchema } from '../lib/category/schemas/category';
+import { DateFilter } from '../lib/common/components/DataFilter';
 import { NewExpenseForm } from '../lib/expense/components/NewExpenseForm';
 import { ExpenseSchema } from '../lib/expense/schemas/expense';
 
@@ -13,16 +14,15 @@ const currentMonth = new Date().getMonth() + 1;
 
 export const CategoryPage = () => {
   const { id } = useParams<{ id: string }>();
-  const categoryId = parseInt(id ?? '');
+  const categoryId = parseInt(id ?? '', 10);
+  const queryClient = useQueryClient();
 
-  const [year, setYear] = useState(currentYear);
-  const [month, setMonth] = useState(currentMonth);
   const [filter, setFilter] = useState({
     year: currentYear,
     month: currentMonth,
   });
 
-  const { data: expenses } = useSuspenseQuery({
+  const { data: expenses, refetch: refetchExpenses } = useSuspenseQuery({
     queryKey: ['expenses', categoryId, filter.year, filter.month],
     queryFn: () =>
       apiQuery('/expenses/detail', ExpenseSchema.array(), {
@@ -39,11 +39,8 @@ export const CategoryPage = () => {
 
   const handleDelete = async (expenseId: number) => {
     await getAxiosInstance().delete(`/expenses/${expenseId}`);
-    window.location.reload();
-  };
-
-  const handleFilter = () => {
-    setFilter({ year, month });
+    queryClient.clear();
+    await refetchExpenses();
   };
 
   const category = useMemo(
@@ -67,43 +64,11 @@ export const CategoryPage = () => {
         </p>
       </div>
 
-      <div className="mb-4 flex flex-wrap items-end gap-4">
-        <div className="flex flex-col">
-          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-            Año{' '}
-          </label>
-          <input
-            type="number"
-            value={year}
-            onChange={(e) => setYear(parseInt(e.target.value))}
-            className="w-24 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-          />
-        </div>
-
-        <div className="flex flex-col">
-          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-            Mes{' '}
-          </label>
-          <select
-            value={month}
-            onChange={(e) => setMonth(parseInt(e.target.value))}
-            className="w-24 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-          >
-            {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
-              <option key={m} value={m}>
-                {m.toString().padStart(2, '0')}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <button
-          onClick={handleFilter}
-          className="mt-auto rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-blue-700"
-        >
-          Buscar
-        </button>
-      </div>
+      <DateFilter
+        initialYear={filter.year}
+        initialMonth={filter.month}
+        onApply={(newFilter) => setFilter(newFilter)}
+      />
 
       <div className="mb-6 rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:p-6 dark:border-gray-700 dark:bg-gray-900">
         <NewExpenseForm categoryId={categoryId} />
