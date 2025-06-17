@@ -22,6 +22,7 @@ export const LeftBar = ({ className, ...props }: Props) => {
 
   const logOut = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('email');
     window.location.href = '/';
   };
 
@@ -68,7 +69,7 @@ export const LeftBar = ({ className, ...props }: Props) => {
               <LuUser size={30} />
               <div>
                 <p className="font-semibold text-gray-900 dark:text-white">
-                  {user.username}
+                  {user.email}
                 </p>
               </div>
             </div>

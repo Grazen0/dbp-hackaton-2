@@ -1,30 +1,29 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
-import { getAxiosInstance } from '../lib/api/util/axios-instance';
+import { getAxiosInstanceUnauthenticated } from '../lib/api/util/axios-instance';
 
 export const Register = () => {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const navigate = useNavigate();
 
+  // TODO: better error messages (password too short, etc)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
     setError(null);
 
     try {
-      const res = await getAxiosInstance().post('/auth/register', {
-        username,
-        password,
+      await getAxiosInstanceUnauthenticated().post('/authentication/register', {
+        email,
+        passwd: password,
       });
-      const { token } = res.data;
-      localStorage.setItem('token', token);
-      navigate('/');
+      navigate('/login');
     } catch {
-      setError('No se pudo crear la cuenta. Intenta con otro nombre.');
+      setError('No se pudo crear la cuenta. Intenta con otro correo.');
     } finally {
       setSubmitting(false);
     }
@@ -47,12 +46,12 @@ export const Register = () => {
         )}
 
         <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-          Usuario
+          Correo electrónico
         </label>
         <input
-          type="text"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           className="mb-4 w-full rounded border border-gray-300 px-3 py-2 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
           required
         />
