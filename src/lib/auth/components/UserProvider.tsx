@@ -1,4 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react';
+import { resetAxiosInstance } from '../../api/util/axios-instance';
 import { UserSchema } from '../../user/schemas/user';
 import { UserContext } from '../context/user-context';
 
@@ -7,7 +8,6 @@ export interface Props {
 }
 
 export const UserProvider = ({ children }: Props) => {
-  const [loading, setLoadingUser] = useState(true);
   const [user, setUser] = useState<UserSchema | null>(null);
 
   useEffect(() => {
@@ -15,8 +15,15 @@ export const UserProvider = ({ children }: Props) => {
     if (email !== null) {
       setUser({ email });
     }
-    setLoadingUser(false);
   }, []);
 
-  return <UserContext value={[loading, user]}>{children}</UserContext>;
+  const reload = () => {
+    const email = localStorage.getItem('email');
+    if (email !== null) {
+      setUser({ email });
+    }
+    resetAxiosInstance();
+  };
+
+  return <UserContext value={[reload, user]}>{children}</UserContext>;
 };

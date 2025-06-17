@@ -1,12 +1,19 @@
+import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
-import { getAxiosInstanceUnauthenticated } from '../lib/api/util/axios-instance';
+import {
+  getAxiosInstanceUnauthenticated,
+  resetAxiosInstance,
+} from '../lib/api/util/axios-instance';
+import { useUser } from '../lib/auth/hooks/use-user';
 
 export const Login = () => {
+  const [reloadUser] = useUser();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
   const navigate = useNavigate();
 
@@ -23,10 +30,13 @@ export const Login = () => {
           passwd: password,
         },
       );
-      // TODO: add response schema for this
       const { result } = res.data;
       localStorage.setItem('token', result.token);
       localStorage.setItem('email', result.username);
+      reloadUser();
+      resetAxiosInstance();
+      queryClient.clear();
+
       navigate('/');
     } catch (err) {
       console.error(err);

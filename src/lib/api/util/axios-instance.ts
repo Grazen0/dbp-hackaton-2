@@ -27,3 +27,7 @@ export const getAxiosInstanceUnauthenticated = () => {
   }
   return instanceUnauthenticated;
 };
+
+export const resetAxiosInstance = () => {
+  instance = null;
+};

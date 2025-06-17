@@ -1,6 +1,7 @@
 import { QueryErrorResetBoundary } from '@tanstack/react-query';
 import { Suspense, useRef, type ReactNode } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
+import { useLocation } from 'react-router';
 import { ScrollRestorer } from '../behavior/ScrollRestorer';
 import { ErrorFallback } from '../pages/ErrorFallback';
 import { LoadingScreen } from '../pages/LoadingScreen';
@@ -12,6 +13,7 @@ export interface Props {
 
 export const Layout = ({ children }: Props) => {
   const mainRef = useRef<HTMLDivElement>(null);
+  const location = useLocation();
 
   return (
     <div className="flex max-h-screen grow justify-items-stretch bg-white text-gray-900 dark:bg-gray-900 dark:text-white">
@@ -26,7 +28,11 @@ export const Layout = ({ children }: Props) => {
       >
         <QueryErrorResetBoundary>
           {({ reset }) => (
-            <ErrorBoundary onReset={reset} fallbackRender={ErrorFallback}>
+            <ErrorBoundary
+              onReset={reset}
+              fallbackRender={ErrorFallback}
+              key={location.pathname}
+            >
               <Suspense fallback={<LoadingScreen />}>{children}</Suspense>
             </ErrorBoundary>
           )}
