@@ -1,0 +1,26 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-main: 'Comic Relief', var(--font-sans);
+}
+
+@layer base {
+  body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-main);
+  }
+
+  #root {
+    display: contents;
+  }
+
+  * {
+    @apply transition-colors;
+  }
+}
+
+@custom-variant dark (&:where(.dark, .dark *));
