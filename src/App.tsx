@@ -18,7 +18,7 @@ const queryClient = new QueryClient({
 });
 
 export const App = () => (
-  <BrowserRouter>
+  <BrowserRouter basename="/dbp-hackaton-2">
     <form onSubmit={() => {}}></form>
     <QueryClientProvider client={queryClient}>
       <UserProvider>
